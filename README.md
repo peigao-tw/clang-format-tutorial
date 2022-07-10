@@ -166,6 +166,48 @@ clang-format -style=llvm -dump-config > .clang-format
 
 #### Vim 集成
 
+查找脚本路径
+
+```bash
+dpkg -L clang-format | grep -G ".py$"
+```
+
+```
+/usr/share/vim/addons/syntax/clang-format.py
+```
+
+在 .vimrc 添加快捷键映射,
+
+```
+map <C-K> :py3f /usr/share/vim/addons/syntax/clang-format.py<cr>
+imap <C-K> <c-o>:py3f /usr/share/vim/addons/syntax/clang-format.py<cr>
+```
+
+这里需要注意的是，需要确保安装的 vim 版本支持 python3，你可以通过
+
+```bash
+vim --version
+```
+
+查看系统安装的 vim 是否支持 python，以及支持的 python 版本。
+
+以上的配置中，第一行将在普通模式和可视模式下启用格式化，第二行则是在插入模式下。
+
+通过这种集成，您可以按绑定键，clang-format 将在 NORMAL 和 INSERT 模式下格式化当前行或在 VISUAL 模式下格式化所选区域。 行或区域被扩展到下一个更大的句法实体。
+
+它对当前可能未保存的缓冲区进行操作，并且不创建或保存任何文件。 要恢复格式，只需撤消即可。
+
+另一种选择是在保存文件时格式化更改，这样你就不用在编码的时候手动格式化了。 
+为此，请将以下配置添加到您的 .vimrc 中：
+
+```
+function! Formatonsave()
+  let l:formatdiff = 1
+  pyf ~/llvm/tools/clang/tools/clang-format/clang-format.py
+endfunction
+autocmd BufWritePre *.h,*.cc,*.cpp call Formatonsave()
+```
+
 ## 参考
 
 * [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html)
